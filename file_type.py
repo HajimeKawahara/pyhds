@@ -15,7 +15,6 @@ for i in range(1,len(argvs)):
     hduread=fits.open(file)
     name=hduread[0].header["Object"]
     expt=hduread[0].header["EXPTIME"]
-
     if name=="FLAT":
         flat.append(file)
         expflat.append(expt)

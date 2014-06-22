@@ -41,3 +41,23 @@ else:
     print "(C2) the bias correction"
     iraf.imarith(operand1='@nl.list',op="-",operand2='bias.fits',result="@b.list")
 
+#(E1)
+f=glob.glob("flat.fits")
+if len(f)>0:
+    print "-(E1) flat.fits exists. Skip creation of unnormalized master flat (flats.fits)."
+else:
+    print "(E1) the unnormalized master flat (flats.fits)"
+    iraf.imcombine(input='@flat.list',output='flat.fits',combine="median")
+
+
+
+fn=glob.glob("f*.fits")
+fnc=glob.glob("flat*.fits")
+
+if len(fn)-len(fnc)>0:
+    print "-(E3) f exists. Skip the flat correction."
+elif os.path.exists("flatn.fits"):
+    print "(E3) the flat correction b/flatn.fits"
+    iraf.imarith(operand1='@b.list',op="/",operand2='flatn.fits',result="@f.list")
+else:
+    print  "-(E3) flatn.fits does not exist. Perform (E2) process before (E3)."
