@@ -43,7 +43,7 @@ bias = open('bias.list', 'wb')
 otfsw2=0
 flatt=[]
 flatname=[]
-for i in range(1,len(args.f)):
+for i in range(0,len(args.f)):
     otfsw=0
     file=args.f[i]
     hduread=fits.open(file)
