@@ -18,3 +18,5 @@ print obs
 print expt
 print wavmax, wavmin
 print ax1,ax2
+
+#print hduread[0].header.ascardlist()
