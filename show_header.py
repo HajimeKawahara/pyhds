@@ -1,5 +1,6 @@
-#!/usr/bin/python
+#!/usr/bin/env python
 import argparse
+import astropy
 from astropy.io import fits
 import sys
 import numpy as np

@@ -1,4 +1,4 @@
-#!/Users/kawahara/Ureka/variants/common/bin/python
+#!/usr/bin/env python
 from astropy.io import fits
 import sys
 from pyraf import iraf
