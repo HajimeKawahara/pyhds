@@ -1,8 +1,6 @@
 #!/usr/bin/env python
 from astropy.io import fits
 import numpy as np
-#import sys
-#argvs = sys.argv
 import argparse
 
 parser = argparse.ArgumentParser(description='Make lists for HDS analysis')
