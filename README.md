@@ -6,3 +6,4 @@ This code is a helper for hdsql.
 
 - python3
 - astropy
+- specmatch-emp
