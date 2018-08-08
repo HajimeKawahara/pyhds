@@ -9,6 +9,9 @@ def read_hds_ecf(fitsfile,wavlim=None):
     ###scombine H31064omlcs_ecfwzr H31064omlcs_ecfwzr_c combine=sum group=images
     hdu = fits.open(fitsfile)
     header=hdu[0].header
+    name=header["OBJECT"]
+    print("OBJECT=",name)
+
     #    print("MJD",header["MJD"])
     #    print("JD",float(header["MJD"])+2400000.5)
     #    print("RA",header["RA"])
@@ -22,7 +25,7 @@ def read_hds_ecf(fitsfile,wavlim=None):
         print(ind)
         return wav[ind[0]:ind[1]],data[ind[0]:ind[1]]
     else:
-        return wav,data
+        return wav,data,header
 
 
 def read_hds2d(fitsecf,blazedf,wavlim=None):
@@ -38,16 +41,16 @@ def read_hds2d(fitsecf,blazedf,wavlim=None):
         from pyraf import iraf
         iraf.scombine(input=blazedf,output=blazedf_combined,combine="sum",group="images")
 
-    wav,data=read_hds_ecf(fitsecf_combined)#,wavlim=[5140,5200])
-    bwav,bdata=read_hds_ecf(blazedf_combined)#,wavlim=[5140,5200])
+    wav,data,header=read_hds_ecf(fitsecf_combined)#,wavlim=[5140,5200])
+    bwav,bdata,header_blaze=read_hds_ecf(blazedf_combined)#,wavlim=[5140,5200])
 
     normspec=data/bdata
     
     if wavlim:
         ind=np.searchsorted(wav,wavlim)
-        return wav[ind[0]:ind[1]], normspec[ind[0]:ind[1]], np.sqrt(data)[ind[0]:ind[1]]
+        return wav[ind[0]:ind[1]], normspec[ind[0]:ind[1]], np.sqrt(data)[ind[0]:ind[1]], header
     else:
-        return wav, normspec, np.sqrt(data)
+        return wav, normspec, np.sqrt(data), header
 
 def normclipspec(normspec,crits=3.0,n=3):    
 
@@ -85,20 +88,22 @@ def read_nhds2d(filelist,blazedf,wavlim=[5140,5200]):
     specall=[]
     maskall=[]
     specsnall=[]
+    headerall=[]
     wavcheck=0.0
     for fitsecf in filelist:
         print(fitsecf)
-        wav,spec,specsn=read_hds2d(fitsecf,blazedf,wavlim=wavlim)
+        wav,spec,specsn,header=read_hds2d(fitsecf,blazedf,wavlim=wavlim)
         spec,mask=medclipspec(spec)
         if len(filelist)==1:
-            return wav, spec, mask, specsn
+            return wav, spec, mask, specsn, [header]
         
         spec[~mask]=None
         specsn[~mask]=None
-
+        
         specall.append(spec)
         maskall.append(mask)
         specsnall.append(specsn)
+        headerall.append(header)
         if wavcheck != 0.0 and wav[0] != wavcheck:
             print("Inconsistent wavelength!")
             sys.exit()
@@ -107,7 +112,7 @@ def read_nhds2d(filelist,blazedf,wavlim=[5140,5200]):
     spec=np.nanmean(specall,axis=0)
     specsn=np.sqrt(np.nansum(np.array(specsnall)**2,axis=0))
     mask = (spec==spec)
-    return wav, spec, mask, specsn
+    return wav, spec, mask, specsn, headerall
 
 if __name__ == "__main__":
 #    parser = argparse.ArgumentParser(description='Read/Convert ecf(wr)_c (scombined spectrum) file to ...')

@@ -6,19 +6,23 @@ import specmatchemp.plots as smplot
 import matplotlib.pyplot as plt
 from specmatchemp.specmatch import SpecMatch
 import read_hds as rh
- 
+import argparse
+import os
+import sys
+from time import sleep
+
 def oncpaint(event):
     fac=100.0
     xL=(wav[-1]-wav[0])/fac
     yL=spec[-1]-spec[0]
     r2=(wav-event.xdata)**2/xL**2 + (spec-event.ydata)**2/yL**2
-    ind=np.argmin(r2)
-
+    ind=np.nanargmin(r2)
     #    if event.button==1:
     if event.key=='x':
         mask[ind]=False
         plt.title("MASK="+str(ind))
         plt.plot([wav[ind]],[spec[ind]],".",color="gray")
+
     #    elif event.button==3:
     elif event.key=='d':
         mask[ind]=True
@@ -28,32 +32,56 @@ def oncpaint(event):
     fig.canvas.draw()
     
 if __name__ == "__main__":
-#    parser = argparse.ArgumentParser(description='Read/Convert ecf(wr)_c (scombined spectrum) file to ...')
-#    parser.add_argument('-f', nargs=1, required=True, help='ecf')
-#    args = parser.parse_args()
-    
-#    fitslist=["/home/kawahara/hds/ana/o18113/H31062omlcs_ecfw.fits",
-#              "/home/kawahara/hds/ana/o18113/H31064omlcs_ecfw.fits"]
+    parser = argparse.ArgumentParser(description='specmatch_emp fit of HDS spectrum')
+    parser.add_argument('-d', nargs=1, default=["/home/kawahara/hds/ana/"],help='directory',type=str)
+    parser.add_argument('-i', nargs=1, required=True, help='obs id',type=str)
+    parser.add_argument('-f', nargs="+", required=True, help='frame id(s)',type=str)
+    parser.add_argument('-e', nargs=1, default=["omlcs_ecfw"], help='file type',type=str)
+    parser.add_argument('-b', nargs=1, default=["sBlazeB.fits"], help='blazed function',type=str)
+
+    args = parser.parse_args()
+    os.chdir(args.d[0])
+
+    if args.e[0][-4:] != "ecfw" and len(args.f) > 1:
+        print(args.e[0][-4:])
+        print("Use ecfw for the file type (-e) because you need to combine the spectra.")
+        sys.exit("STOP")
+    fitslist=[]
+    for i in args.f:
+        fitslist.append(os.path.join("o"+str(args.i[0]),"H"+str(i)+str(args.e[0])+".fits"))
     #data region
     wavlimin=[5130,5210]
 
-    fitslist=["/home/kawahara/hds/ana/o18113/H31086omlcs_ecfw.fits"]
-    blazedf="/home/kawahara/hds/ana/o18113/sBlazeB.fits"    
-    wav,spec,mask,specsn = rh.read_nhds2d(fitslist,blazedf,wavlim=wavlimin)
+    blazedf=os.path.join("o"+str(args.i[0]),str(args.b[0]))
+    print("blaze function=",blazedf)
 
+    wav,spec,mask,specsn,header = rh.read_nhds2d(fitslist,blazedf,wavlim=wavlimin)
+
+    #NAME CHECK
+    name=None
+    print(np.shape(header))
+    for ih in header:
+        if name == None or name == ih["OBJECT"]:
+            print("OBJECT=",ih["OBJECT"])
+        else:
+            print("OBJECT=",ih["OBJECT"])
+            print("MISMATCH OBJECTS. OK? waiting 3 sec.")
+            sleep(10)
+        name=ih["OBJECT"]
+
+        
     #MASKING
-    msk=True
+    maskfile=os.path.join("o"+str(args.i[0]),fitslist[0]+".mask.npy")
+    msk=os.path.isfile(maskfile)
     if msk:
-        mask=np.load(fitslist[0]+".mask.npy")
+        mask=np.load(maskfile)
     fig=plt.figure()
     plt.plot(wav,spec,".",color="gray")
     plt.plot(wav[mask],spec[mask],".",color="red")
     plt.title("put x for mask, c for unmask.")
-    if not msk:
-        cid = fig.canvas.mpl_connect('key_press_event', oncpaint)
+    cid = fig.canvas.mpl_connect('key_press_event', oncpaint)
     plt.show()
-    if not msk:
-        np.save(fitslist[0]+".mask",mask)
+    np.save(fitslist[0]+".mask",mask)
 
     #INITIALIZATION
     #fit region
@@ -86,3 +114,10 @@ if __name__ == "__main__":
     sm_G.plot_lincomb()
     plt.show()
 
+    w=sm_G.lincomb_matches[0].target.w #wavelength
+    s=sm_G.lincomb_matches[0].target.s #spectrum
+    ss=sm_G.lincomb_matches[0].modified.s #fit curve
+
+    #SAVE
+    savefile=os.path.join(name+".ws")
+    np.savez(savefile,[np.array([w,s,ss]),sm_G.results,header])
