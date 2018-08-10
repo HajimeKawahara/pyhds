@@ -41,16 +41,17 @@ if __name__ == "__main__":
 
     args = parser.parse_args()
     os.chdir(args.d[0])
-
-    if args.e[0][-4:] != "ecfw" and len(args.f) > 1:
+    print("Extension=",args.e[0][-4:])
+    if (args.e[0][-4:] != "ecfw" and args.e[0][-3:] != "ecw" and args.e[0][-4:] != "ecwc") and len(args.f) > 1:
         print(args.e[0][-4:])
-        print("Use ecfw for the file type (-e) because you need to combine the spectra.")
+        print("Use ecfw/ecw for the file type (-e) because you need to combine the spectra.")
         sys.exit("STOP")
     fitslist=[]
     for i in args.f:
         fitslist.append(os.path.join("o"+str(args.i[0]),"H"+str(i)+str(args.e[0])+".fits"))
     #data region
     wavlimin=[5130,5210]
+    wavlimin=[5130,5211]
 
     blazedf=os.path.join("o"+str(args.i[0]),str(args.b[0]))
     print("blaze function=",blazedf)

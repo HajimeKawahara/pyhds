@@ -2,11 +2,16 @@
 from astropy.io import fits
 import numpy as np
 import argparse
+import os
 
 parser = argparse.ArgumentParser(description='Make lists for HDS analysis')
 parser.add_argument('-f', nargs="+", required=True, help='HDSA fits')
+parser.add_argument('-i', nargs=1, required=True, help='obs id',type=str)
 parser.add_argument('-o', nargs="+", help='order tracer flat')
+parser.add_argument('-d', nargs=1, default=["/home/kawahara/hds/ana"],help='directory',type=str)
+
 args = parser.parse_args()    
+anadir=os.path.join(args.d[0],"o"+str(args.i[0]))
 
 flat=[]
 expflat=[]
@@ -16,27 +21,30 @@ expbias=[]
 obs=[]
 obsname=[]
 
-otf = open('otf.list', 'w', encoding="utf-8")
-raw = open('raw.list', 'w', encoding="utf-8")
-f = open('f.list', 'w', encoding="utf-8")
-b = open('b.list', 'w', encoding="utf-8")
-ov = open('ov.list', 'w', encoding="utf-8")
-nl = open('nl.list', 'w', encoding="utf-8")
-a = open('a.list', 'w', encoding="utf-8")
-asl = open('as.list', 'w', encoding="utf-8")
-s = open('s.list', 'w', encoding="utf-8")
-w = open('w.list', 'w', encoding="utf-8")
-p = open('p.list', 'w', encoding="utf-8")
-v = open('v.list', 'w', encoding="utf-8")
-q = open('q.list', 'w', encoding="utf-8")
+#bias list
+bB = open(os.path.join(anadir,'b.B.list'), 'w', encoding="utf-8")
+bR = open(os.path.join(anadir,'b.R.list'), 'w', encoding="utf-8")
 
-fobj = open('f.obj.list', 'w', encoding="utf-8")
-bobj = open('b.obj.list', 'w', encoding="utf-8")
-fcomp = open('f.comp.list', 'w', encoding="utf-8")
-acomp = open('a.comp.list', 'w', encoding="utf-8")
+#bias H list
+HB = open(os.path.join(anadir,'H.B.list'), 'w', encoding="utf-8")
+HR = open(os.path.join(anadir,'H.R.list'), 'w', encoding="utf-8")
 
-flat = open('flat.list', 'w', encoding="utf-8")
-bias = open('bias.list', 'w', encoding="utf-8")
+#comparison
+compB = open(os.path.join(anadir,'comp.B.list'), 'w', encoding="utf-8")
+compR = open(os.path.join(anadir,'comp.R.list'), 'w', encoding="utf-8")
+
+#Order trace flat
+otf = open(os.path.join(anadir,'otf.list'), 'w', encoding="utf-8")
+
+#flat
+fR = open(os.path.join(anadir,'f.R.list'), 'w', encoding="utf-8")
+fB = open(os.path.join(anadir,'f.B.list'), 'w', encoding="utf-8")
+fRoml = open(os.path.join(anadir,'f.Roml.list'), 'w', encoding="utf-8")
+fBoml = open(os.path.join(anadir,'f.Boml.list'), 'w', encoding="utf-8")
+
+#object
+objR = open(os.path.join(anadir,'obj.R.list'), 'w', encoding="utf-8")
+objB = open(os.path.join(anadir,'obj.B.list'), 'w', encoding="utf-8")
 
 otfsw2=0
 flatt=[]
@@ -54,36 +62,35 @@ for i in range(0,len(args.f)):
                 otfsw2=otfsw2+1
                 print("ORDER TRACE FILE DETECTED.")
                 print(("SLT-LEN=",slt))
-                otf.write("b"+str(file[7:])+"\n")
+                otf.write(str(file[7:])+"\n")
             
     if file[0:4]=="HDSA":
-        raw.write(str(file)+'[0]'+"\n")
-        f.write("f"+str(file[7:])+"\n")
-        b.write("b"+str(file[7:])+"\n")
-        ov.write("ov"+str(file[7:])+"\n")
-        nl.write("nl"+str(file[7:])+"\n")
-        print(("all",name,file[7:]))
         if name != "COMPARISON" and name != "FLAT" and name != "BIAS":
-            a.write("a"+str(file[7:])+"\n")
-            s.write("s"+str(file[7:])+"\n")
-            w.write("w"+str(file[7:])+"\n")
-            asl.write("as"+str(file[7:])+"\n")
-            p.write("p"+str(file[7:])+"\n")
-            v.write("v"+str(file[7:])+"\n")
-            q.write("q"+str(file[7:])+"\n")
-
-            fobj.write("f"+str(file[7:])+"\n")
-            bobj.write("b"+str(file[7:])+"\n")
+            if np.mod(int(file[11]),2)==1:
+                objR.write(str(file[7:])+"\n")            
+            else:
+                objB.write(str(file[7:])+"\n")
         if name == "FLAT" and otfsw == 0:
-            print((name,file[7:]))
-            flat.write("b"+str(file[7:])+"\n")
+            if np.mod(int(file[11]),2)==1:
+                fR.write(str(file[7:])+"\n")
+                fRoml.write("H"+str(file[7:]).replace(".fits","oml.fits")+"\n")
+            else:
+                fB.write(str(file[7:])+"\n")
+                fBoml.write("H"+str(file[7:]).replace(".fits","oml.fits")+"\n")
             flatt.append(slt)
             flatname.append(file)
         if name == "BIAS":
-            bias.write("nl"+str(file[7:])+"\n")
+            if np.mod(int(file[11]),2)==1:
+                bR.write(str(file[7:])+"\n")
+                HR.write("H"+str(file[7:]).replace(".fits","o.fits")+"\n")
+            else:
+                bB.write(str(file[7:])+"\n")
+                HB.write("H"+str(file[7:]).replace(".fits","o.fits")+"\n")
         if name == "COMPARISON":
-            fcomp.write("f"+str(file[7:])+"\n")
-            acomp.write("a"+str(file[7:])+"\n")
+            if np.mod(int(file[11]),2)==1:
+                compR.write(str(file[7:])+"\n")
+            else:
+                compB.write(str(file[7:])+"\n")
 
 if args.o:
     if otfsw2<len(args.o):
@@ -101,20 +108,23 @@ if min(flatt) < max(flatt):
     print(("SLT-LEN=",flatt[mask],"mm"))
     print("########################################")
 
-raw.close
-f.close
-b.close
-ov.close
-nl.close
-a.close
-asl.close
-p.close
-s.close
-w.close
-q.close
-v.close
-fobj.close
-flat.close
-bias.close
-fcomp.close
-acomp.close
+
+#bias list
+bB.close
+bR.close
+#bias H list
+HB.close
+HR.close
+#comparison
+compB.close
+compR.close
+#Order trace flat
+otf.close
+#flat
+fR.close
+fB.close
+fRoml.close
+fBoml.close
+#object
+objR.close
+objB.close

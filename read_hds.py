@@ -45,6 +45,7 @@ def read_hds2d(fitsecf,blazedf,wavlim=None):
     bwav,bdata,header_blaze=read_hds_ecf(blazedf_combined)#,wavlim=[5140,5200])
 
     normspec=data/bdata
+#    normspec=data ###TEST####
     
     if wavlim:
         ind=np.searchsorted(wav,wavlim)
