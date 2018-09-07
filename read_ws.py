@@ -22,7 +22,7 @@ def read_wsres_pd(wslist):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='specmatch_emp fit of HDS spectrum')
-    parser.add_argument('-d', nargs=1, default=["/home/kawahara/hds/ana/"],help='directory',type=str)
+    parser.add_argument('-d', nargs=1, default=["/home/kawahara/hds/ana/spectra"],help='directory',type=str)
     parser.add_argument('-f', nargs=1, default=["npz.list"], help='npzlist',type=str)
 
     args = parser.parse_args()
@@ -47,6 +47,7 @@ if __name__ == "__main__":
         ax.plot(w,model+of+0.5,color="red",lw=1,alpha=0.7)
         of=of+1.5
     df=pd.DataFrame(dic).transpose()
+    plt.xlabel("Wavelength [angstrom]")
     print(df)        
     plt.show()
     #    df.to_csv("hdsemp.csv",sep="|")

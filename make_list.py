@@ -6,7 +6,7 @@ import os
 
 parser = argparse.ArgumentParser(description='Make lists for HDS analysis')
 parser.add_argument('-f', nargs="+", required=True, help='HDSA fits')
-parser.add_argument('-i', nargs=1, required=True, help='obs id',type=str)
+parser.add_argument('-i', nargs=1, required=True, help='obs id. ex.) 18152b, 18152',type=str)
 parser.add_argument('-o', nargs="+", help='order tracer flat')
 parser.add_argument('-d', nargs=1, default=["/home/kawahara/hds/ana"],help='directory',type=str)
 

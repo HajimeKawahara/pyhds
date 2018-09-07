@@ -79,7 +79,7 @@ if __name__ == "__main__":
     fig=plt.figure()
     plt.plot(wav,spec,".",color="gray")
     plt.plot(wav[mask],spec[mask],".",color="red")
-    plt.title("put x for mask, c for unmask.")
+    plt.title("put x for mask, d for unmask.")
     cid = fig.canvas.mpl_connect('key_press_event', oncpaint)
     plt.show()
     np.save(fitslist[0]+".mask",mask)
