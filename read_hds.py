@@ -4,6 +4,8 @@ import matplotlib.pyplot as plt
 import numpy as np
 import sys
 import argparse
+from astroquery.atomic import AtomicLineList
+from astropy import units as u
 
 def read_hds_ecf(fitsfile,wavlim=None):
     ###scombine H31064omlcs_ecfwzr H31064omlcs_ecfwzr_c combine=sum group=images
@@ -116,21 +118,59 @@ def read_nhds2d(filelist,blazedf,wavlim=[5140,5200]):
     return wav, spec, mask, specsn, headerall
 
 if __name__ == "__main__":
-#    parser = argparse.ArgumentParser(description='Read/Convert ecf(wr)_c (scombined spectrum) file to ...')
-#    parser.add_argument('-f', nargs=1, required=True, help='ecf')
-#    args = parser.parse_args()
+    parser = argparse.ArgumentParser(description='show hds spectrum file')
+    parser.add_argument('-f', nargs="+", default=["/home/kawahara/hds/ana/o18113/H31086omlcs_ecfw.fits"], help='hds file')
+    parser.add_argument('-b', nargs=1, default=["/home/kawahara/hds/ana/o18113/sBlazeB.fits"], help='blaze file')
+    parser.add_argument('-r', nargs=1, default=[27.8639], help='RV [km/s]',type=float)
+#    parser.add_argument('-l', nargs=1, default=[27.8639], help='RV [km/s]',type=float)
+    parser.add_argument('-w', nargs=2, default=[5140.0,5200.0], help='wavelength range [nm]',type=float)
+    parser.add_argument('-e', nargs="+", default=["Mg I","Ca I"], help='element',type=str)
+    parser.add_argument('-m', nargs=1, default=[2], help='display format',type=int)
+
+    args = parser.parse_args()    
+    form=args.m[0]
+    c=299792.458
+    rv=args.r[0]
+
+    fitslist=args.f
+    blazedf=args.b[0]
+    wavlim=args.w #angstrom
+    print(wavlim)
+    wav,spec,mask,specsn,header = read_nhds2d(fitslist,blazedf,wavlim=wavlim)
+    object_name=header[0]["OBJECT"]
     
-#    fitslist=["/home/kawahara/hds/ana/o18113/H31062omlcs_ecfw.fits",
-#              "/home/kawahara/hds/ana/o18113/H31064omlcs_ecfw.fits"]
-    fitslist=["/home/kawahara/hds/ana/o18113/H31086omlcs_ecfw.fits"]
+    
+    fig=plt.figure(figsize=(10,3))
+    ax=fig.add_subplot(111)
+    plt.plot(wav[mask],spec[mask],color="gray")
+    plt.xlabel("wavelength [$\\AA$]")
+    plt.title(object_name+" :RV = "+str(rv)+" km/s")
+    maxv=np.max(spec[mask])
+    minv=np.min(spec[mask])                    
+    diff=(maxv-minv)
+    if form==1:
+        minv=minv-diff
+    elif form==2:
+        minv=minv-diff/4
 
-    blazedf="/home/kawahara/hds/ana/o18113/sBlazeB.fits"    
-    #    wav,spec,specsn=read_hds2d(fitslist[0],blazedf,wavlim=[5140,5200])    
-    #    spec,mask=normclipspec(spec)
-    wav,spec,mask,specsn = read_nhds2d(fitslist,blazedf,wavlim=[5140,5200])
-
-    fig=plt.figure()
-    plt.plot(wav,spec,".")
- #   Sp=in_specmatch(wav,spec,specsn,mask)    
-    plt.plot(wav[mask],spec[mask],".")
+    wavelength_range = (wavlim[0] * u.angstrom, wavlim[1] * u.angstrom)
+    elelist=args.e
+    i=0
+    for ele in elelist:
+        linelist=AtomicLineList.query_object(wavelength_range, wavelength_type='air', wavelength_accuracy=20, element_spectrum=ele)
+        for l in linelist['LAMBDA AIR ANG']:
+            try:
+                plt.axvline(np.float(l)*(1.0-rv/c),color="C"+str(i),ls="dotted")
+                if form==1:
+                    ax.text(l*(1.0-rv/c),diff*0.0+minv," "+ele+"\n "+str(l)+"$\\AA$",color="C"+str(i),rotation="vertical",verticalalignment="bottom")
+                elif form==2:
+                    ax.text(l*(1.0-rv/c),diff*0.0+minv," "+ele,color="C"+str(i),rotation="vertical",verticalalignment="bottom")
+                    
+            except:
+                print("Ignore ",l)
+        i=i+1
+    plt.ylim(minv,maxv)
+    plt.savefig(object_name+"_spec.png",bbox_inches="tight", pad_inches=0.0)    
     plt.show()
+#                plt.axvline(np.float(ll)*(1.0-rv/c),color="red",ls="dotted")
+#                ax.text(l*(1.0-rv/c),diff*0.0+minv," "+ele+" "+str(l),color="red")

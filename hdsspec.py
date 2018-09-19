@@ -10,6 +10,7 @@ import argparse
 import os
 import sys
 from time import sleep
+from scipy.interpolate import interp1d
 
 def oncpaint(event):
     fac=100.0
@@ -58,6 +59,7 @@ if __name__ == "__main__":
 
     wav,spec,mask,specsn,header = rh.read_nhds2d(fitslist,blazedf,wavlim=wavlimin)
 
+    
     #NAME CHECK
     name=None
     print(np.shape(header))
@@ -72,9 +74,10 @@ if __name__ == "__main__":
 
         
     #MASKING
-    maskfile=os.path.join("o"+str(args.i[0]),fitslist[0]+".mask.npy")
+    maskfile=os.path.join(fitslist[0]+".mask.npy")
     msk=os.path.isfile(maskfile)
     if msk:
+        print("load maskfile.")
         mask=np.load(maskfile)
     fig=plt.figure()
     plt.plot(wav,spec,".",color="gray")
@@ -93,6 +96,10 @@ if __name__ == "__main__":
     sm_G = SpecMatch(G_spectrum, lib)
     sm_G.shift()
 
+    print(len(sm_G.target_unshifted.w))
+    print(len(sm_G.target.w))
+    print(sm_G.__dict__)
+    
     #######PLOT shift#####
     fig = plt.figure(figsize=(10,5))
     sm_G.target_unshifted.plot(normalize=True, plt_kw={'color':'forestgreen'}, text='Target (unshifted)')
@@ -118,7 +125,45 @@ if __name__ == "__main__":
     w=sm_G.lincomb_matches[0].target.w #wavelength
     s=sm_G.lincomb_matches[0].target.s #spectrum
     ss=sm_G.lincomb_matches[0].modified.s #fit curve
-
+    
     #SAVE
     savefile=os.path.join(name+".ws")
     np.savez(savefile,[np.array([w,s,ss]),sm_G.results,header])
+
+    ##RV
+    margin=10.0 #AA
+    w0=w[0] + margin
+    w1=w[-1] - margin
+    f = interp1d(w, ss)
+
+    wavuse=wav[mask]
+    specuse=spec[mask]
+    maskwav=(wavuse>w0)*(wavuse<w1)
+    wavuse=wavuse[maskwav]
+    specuse=specuse[maskwav]
+
+    c=299792.458
+    vmax=100.0 #km/s
+    nsearch=2000
+    vpcsearch=np.linspace(-vmax/c,vmax/c,nsearch)
+    cc=[]
+    for vpc in vpcsearch:
+        cc.append(np.sum(f(wavuse*(1.0+vpc))*specuse))
+    cc=np.array(cc)
+    maxind=np.argmax(cc)
+    rv = vpcsearch[maxind]*c
+    print("RV=",rv,"km/s")
+
+    f = open("rv.txt", 'a')
+    f.write(name+","+str(rv)+"\n")
+    f.close()
+
+    fig=plt.figure()
+    plt.plot(vpcsearch*c,cc)
+    plt.plot([rv],[cc[maxind]],"o")
+    plt.xlabel("RV [km/s]")
+    plt.ylabel("CCF")
+    plt.title(name)
+    plt.show()
+
+    
