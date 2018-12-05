@@ -1,0 +1,5 @@
+hdspy
+
+file_type.py : fitsのobjectやexptなどを確認。最初にディレクトリに置くべきファイルをチェックする時に用いる。
+
+make_list.py *.list作成
