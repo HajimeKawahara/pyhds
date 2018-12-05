@@ -37,7 +37,7 @@ if __name__ == "__main__":
     parser.add_argument('-d', nargs=1, default=["/home/kawahara/hds/ana/"],help='directory',type=str)
     parser.add_argument('-i', nargs=1, required=True, help='obs id',type=str)
     parser.add_argument('-f', nargs="+", required=True, help='frame id(s)',type=str)
-    parser.add_argument('-e', nargs=1, default=["omlcs_ecfw"], help='file type',type=str)
+    parser.add_argument('-e', nargs=1, default=["omlcs_ecfwr"], help='file type',type=str)
     parser.add_argument('-b', nargs=1, default=["sBlazeB.fits"], help='blazed function',type=str)
 
     args = parser.parse_args()

@@ -124,6 +124,8 @@ if __name__ == "__main__":
     parser.add_argument('-r', nargs=1, default=[27.8639], help='RV [km/s]',type=float)
 #    parser.add_argument('-l', nargs=1, default=[27.8639], help='RV [km/s]',type=float)
     parser.add_argument('-w', nargs=2, default=[5140.0,5200.0], help='wavelength range [nm]',type=float)
+    parser.add_argument('-l', help='Show metal lines', action='store_true')
+
     parser.add_argument('-e', nargs="+", default=["Mg I","Ca I"], help='element',type=str)
     parser.add_argument('-m', nargs=1, default=[2], help='display format',type=int)
 
@@ -152,24 +154,30 @@ if __name__ == "__main__":
         minv=minv-diff
     elif form==2:
         minv=minv-diff/4
-
-    wavelength_range = (wavlim[0] * u.angstrom, wavlim[1] * u.angstrom)
-    elelist=args.e
-    i=0
-    for ele in elelist:
-        linelist=AtomicLineList.query_object(wavelength_range, wavelength_type='air', wavelength_accuracy=20, element_spectrum=ele)
-        for l in linelist['LAMBDA AIR ANG']:
+    #LINES
+    if args.l:
+        wavelength_range = (wavlim[0] * u.angstrom, wavlim[1] * u.angstrom)
+        elelist=args.e
+        i=0
+        for ele in elelist:
             try:
-                plt.axvline(np.float(l)*(1.0-rv/c),color="C"+str(i),ls="dotted")
-                if form==1:
-                    ax.text(l*(1.0-rv/c),diff*0.0+minv," "+ele+"\n "+str(l)+"$\\AA$",color="C"+str(i),rotation="vertical",verticalalignment="bottom")
-                elif form==2:
-                    ax.text(l*(1.0-rv/c),diff*0.0+minv," "+ele,color="C"+str(i),rotation="vertical",verticalalignment="bottom")
+                linelist=AtomicLineList.query_object(wavelength_range, wavelength_type='air', wavelength_accuracy=20, element_spectrum=ele)
+                for l in linelist['LAMBDA AIR ANG']:
+                    try:
+                        plt.axvline(np.float(l)*(1.0-rv/c),color="C"+str(i),ls="dotted")
+                        if form==1:
+                            ax.text(l*(1.0-rv/c),diff*0.0+minv," "+ele+"\n "+str(l)+"$\\AA$",color="C"+str(i),rotation="vertical",verticalalignment="bottom")
+                        elif form==2:
+                            ax.text(l*(1.0-rv/c),diff*0.0+minv," "+ele,color="C"+str(i),rotation="vertical",verticalalignment="bottom")
                     
+                    except:
+                        print("Ignore ",ele,l)
             except:
-                print("Ignore ",l)
-        i=i+1
+                print("Failed for the element ",ele)        
+            i=i+1
+    ###########################
     plt.ylim(minv,maxv)
+    plt.savefig(object_name+"_spec.pdf",bbox_inches="tight", pad_inches=0.0)    
     plt.savefig(object_name+"_spec.png",bbox_inches="tight", pad_inches=0.0)    
     plt.show()
 #                plt.axvline(np.float(ll)*(1.0-rv/c),color="red",ls="dotted")
