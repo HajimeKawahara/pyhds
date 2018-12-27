@@ -39,6 +39,7 @@ if __name__ == "__main__":
     parser.add_argument('-f', nargs="+", required=True, help='frame id(s)',type=str)
     parser.add_argument('-e', nargs=1, default=["omlcs_ecfw"], help='file type',type=str)
     parser.add_argument('-b', nargs=1, default=["sBlazeB.fits"], help='blazed function',type=str)
+    parser.add_argument('-w', nargs=2, default=[5140,5200], help='wavelength [AA] lower upper',type=float)
 
     args = parser.parse_args()
     os.chdir(args.d[0])
@@ -51,9 +52,16 @@ if __name__ == "__main__":
     for i in args.f:
         fitslist.append(os.path.join("o"+str(args.i[0]),"H"+str(i)+str(args.e[0])+".fits"))
     #data region
-    wavlimin=[5130,5210]
-    wavlimin=[5130,5211]
+    #5000-5800
+    #wavlimd=5140
+    #wavlimu=5200
+    wavlimd=args.w[0]
+    wavlimu=args.w[1]
 
+    wavlim=[wavlimd,wavlimu]
+    wavlimin=[wavlimd-10,wavlimu+11]#[5130,5211]
+    wavtag="AA"+str(int(wavlimd))+"_"+str(int(wavlimu))
+    
     blazedf=os.path.join("o"+str(args.i[0]),str(args.b[0]))
     print("blaze function=",blazedf)
 
@@ -74,7 +82,7 @@ if __name__ == "__main__":
 
         
     #MASKING
-    maskfile=os.path.join(fitslist[0]+".mask.npy")
+    maskfile=os.path.join(fitslist[0]+wavtag+".mask.npy")
     msk=os.path.isfile(maskfile)
     if msk:
         print("load maskfile.")
@@ -89,7 +97,6 @@ if __name__ == "__main__":
 
     #INITIALIZATION
     #fit region
-    wavlim=[5140,5200]
     lib = specmatchemp.library.read_hdf(wavlim=wavlim)
     #SHIFTING
     G_spectrum=rh.in_specmatch(wav[mask],spec[mask],specsn[mask])
@@ -105,12 +112,13 @@ if __name__ == "__main__":
     sm_G.target_unshifted.plot(normalize=True, plt_kw={'color':'forestgreen'}, text='Target (unshifted)')
     sm_G.target.plot(offset=0.5, plt_kw={'color':'royalblue'}, text='Target (shifted): HD190406')
     sm_G.shift_ref.plot(offset=1, plt_kw={'color':'firebrick'}, text='Reference: '+sm_G.shift_ref.name)
-    plt.xlim(5160,5200)
+    plt.xlim(wavlimd,wavlimu)
     plt.ylim(0,2.2)
     plt.show()
 
     #FIT
-    sm_G.match(wavlim=(5140,5200))
+
+    sm_G.match(wavlim=(wavlimd,wavlimu))
     sm_G.lincomb()
 
     print('Derived Parameters: ')
