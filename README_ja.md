@@ -7,9 +7,9 @@
 
 # tutorial
 
-- formal tutorial of hdsql
+- [Formal tutorial of hdsql](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html)
 
-https://www.naoj.org/Observing/Instruments/HDS/hdsql.html
+Blue = B　(偶数)を例に説明する
 
 ## 0.確認
 
@@ -26,22 +26,21 @@ H.B.list  b.B.list  comp.B.list  f.B.list     f.R.list	   obj.B.list  otf.list
 H.R.list  b.R.list  comp.R.list  f.Boml.list  f.Roml.list  obj.R.list
 ```
 
-
 これを確認と見比べて必要なものだけ編集
 
-- bias (Blue)
--- H.B
--- b.B
+- bias (Blue):
+H.B
+b.B
 
-- comparison
+- comparison:
 comp.B
 
-- flat
--- f.B
--- f.Boml
+- flat:
+f.B
+f.Boml
 
-- object
--- obj.B.list
+- object:
+obj.B.list
 
 ------------------------------------------
 clの起動
@@ -64,8 +63,6 @@ imred
 eche
 cd ana/o????
 ```
-
-------------------------------------------
 
 ## 2.まずhdsqlをもちいてバッチでバイアスからH+++++.fitsなんとかを作成する
 
@@ -90,12 +87,20 @@ inid    =                    Input frame ID
 ===========================================================
 ```
 
-- そこからはチュートリアル通りだがいくつか注意
+そこからは[チュートリアル](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html)通りだがいくつか注意
 
--- mkbadmaskのinputは Bias2x2B[0] を入力
--- (mb_refe  =    Mask2x1B.fits[0]) Bad Pix Mask frame?
+- mkbadmaskのinputは Bias2x2B[0] を入力
+- (mb_refe  =    Mask2x1B.fits[0]) Bad Pix Mask frame?
+- (ap_refe  =    ApI2a2x1B )
 
+## apall
 
+- apallのときにdでだめなの消して、mでいいところを指定
+- "w, [jktb]"
+- back to wide view: "w a" 
+- apply all orders: push "a"
+- setting the upper limit of the error bar after pushing "a" :upper
+- setting the lower limit of the error bar after pushing "a" :lower
 
 ## Blaze
 
