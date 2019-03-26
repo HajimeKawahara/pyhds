@@ -73,7 +73,7 @@ On xgterm
 cl
 ```
 
-input /home/kawahara/hds to "directory"
+input /home/kawahara/hds to "directory". On iraf, 
 
 ```
 imred
@@ -82,6 +82,8 @@ cd ana/o????
 ```
 
 ## 2. Generate H+++++.fits from bias using hdsql
+
+Here is an example of epar hdsql.
 
 ```
 ======================================================    
@@ -104,7 +106,7 @@ inid    =                    Input frame ID
 ===========================================================
 ```
 
-Follow [tutorial](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html) from here. The following lists are some attension.
+Follow the [tutorial](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html) from here. The following lists are some tips.
 
 - Input Bias2x2B[0] in mkbadmask
 - (mb_refe  =    Mask2x1B.fits[0]) Bad Pix Mask frame?
@@ -119,9 +121,9 @@ Follow [tutorial](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html) fro
 - setting the upper limit of the error bar after pushing "a" :upper
 - setting the lower limit of the error bar after pushing "a" :lower
 
-## Blaze
+## simple Blaze function
 
-How to generate sBlazeB (simple Blaze)
+How to generate sBlazeB (simple Blaze function).
 
 ```
 imarith FlatI2a2x1B / FlatI2a2x1B.nm FlatFlatI2a2x1B
