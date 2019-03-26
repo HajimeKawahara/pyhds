@@ -24,7 +24,7 @@ Use [hdsql](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html).
 - Raw data directory -> HDS/data/o?????
 - Analysis directory -> HDS/ana/o?????
 
-- [Formal tutorial of hdsql](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html)
+- [Official tutorial of hdsql](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html)
 
 For examples, we assume the Blue part = B　(even number).
 
