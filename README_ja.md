@@ -102,6 +102,23 @@ inid    =                    Input frame ID
 - setting the upper limit of the error bar after pushing "a" :upper
 - setting the lower limit of the error bar after pushing "a" :lower
 
+## apall
+
+- in apall, delete by "d", specify good positions by "m"
+- Try "w j". j can replaced to k or t or b. difficult to explain, just try, then you will understand.
+- back to wide view: "w a" 
+- apply all orders: push "a"
+- setting the upper limit of the error bar after pushing "a" :upper
+- setting the lower limit of the error bar after pushing "a" :lower
+
+## wavelength calibration
+
+- identify lines: "m", delete identifications:"d"
+- move to the next/previous order: k/j
+- recommend to save by "q" several times during identification.
+- "f" after your identification, remove outliers by "d", back by "q", put "l", refit by "f".
+
+
 ## Blaze
 
 sBlazeBのつくりかた
