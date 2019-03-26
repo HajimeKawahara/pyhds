@@ -115,7 +115,7 @@ Follow the [tutorial](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html)
 ## apall
 
 - in apall, delete by "d", specify good positions by "m"
-- "w, [jktb]"
+- Try "w j". j can replaced to k or t or b. difficult to explain, just try, then you will understand.
 - back to wide view: "w a" 
 - apply all orders: push "a"
 - setting the upper limit of the error bar after pushing "a" :upper
