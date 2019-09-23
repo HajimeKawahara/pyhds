@@ -1,38 +1,21 @@
-# pyhds
-
-This code is a python helper for hdsql (HDS on Subaru).
-
-https://www.naoj.org/Observing/Instruments/HDS/hdsql-e.html
-
-## Requirements
-
-- python3
-- astropy
-- specmatch-emp
-
-## Codes
-
-- hdsspec : hds to specmatch-emp
-- read_ws : compiling and plotting spectra.
-- make_list: generating lists uo be used in hdsql
-
-
-# Tutorial of HDS analysis 
-
-Use [hdsql](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html). 
+# HDS analysis 
 
 - Raw data directory -> HDS/data/o?????
 - Analysis directory -> HDS/ana/o?????
 
-- [Official tutorial of hdsql](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html)
+- 現在はPYHDSとhdsqlを併用
 
-For examples, we assume the Blue part = B　(even number).
+# tutorial
 
-## 0. Confirmation
+- [Formal tutorial of hdsql](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html)
+
+Blue = B　(偶数)を例に説明する
+
+## 0.確認
 
 ~/hds/data/o18152b> show_header.py -f HD*.fits -t OBJECT H_I2CELL H_I2POS SLT-LEN SLT-WID WAV-MIN WAV-MAX EXPTIME -r
 
-## 1. make_list.py in pyhds generates the lists to be used in hdsql
+## 1. リストをつくるのはある程度pyhdsでできる。
 
 ```
 cougar ~/hds/data/o18152b> python ../../pyhds/make_list.py -f HD*.fits -i 18152b
@@ -43,7 +26,7 @@ H.B.list  b.B.list  comp.B.list  f.B.list     f.R.list	   obj.B.list  otf.list
 H.R.list  b.R.list  comp.R.list  f.Boml.list  f.Roml.list  obj.R.list
 ```
 
-Edit them with checking the results from the confirmation.
+これを確認と見比べて必要なものだけ編集
 
 - bias (Blue):
 H.B
@@ -60,20 +43,20 @@ f.Boml
 obj.B.list
 
 ------------------------------------------
-Execute cl.
-At /home/kawahara/hds
+clの起動
+/home/kawahara/hdsで
 
 ```
 xgterm
 ```
 
-On xgterm
+xgterm上で
 
 ```
 cl
 ```
 
-input /home/kawahara/hds to "directory". On iraf, 
+directoryに/home/kawahara/hdsを入力（戻れないから注意）
 
 ```
 imred
@@ -81,9 +64,7 @@ eche
 cd ana/o????
 ```
 
-## 2. Generate H+++++.fits from bias using hdsql
-
-Here is an example of epar hdsql.
+## 2.まずhdsqlをもちいてバッチでバイアスからH+++++.fitsなんとかを作成する
 
 ```
 ======================================================    
@@ -106,11 +87,20 @@ inid    =                    Input frame ID
 ===========================================================
 ```
 
-Follow the [tutorial](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html) from here. The following lists are some tips.
+そこからは[チュートリアル](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html)通りだがいくつか注意
 
-- Input Bias2x2B[0] in mkbadmask
+- mkbadmaskのinputは Bias2x2B[0] を入力
 - (mb_refe  =    Mask2x1B.fits[0]) Bad Pix Mask frame?
 - (ap_refe  =    ApI2a2x1B )
+
+## apall
+
+- apallのときにdでだめなの消して、mでいいところを指定
+- "w, [jktb]"
+- back to wide view: "w a" 
+- apply all orders: push "a"
+- setting the upper limit of the error bar after pushing "a" :upper
+- setting the lower limit of the error bar after pushing "a" :lower
 
 ## apall
 
@@ -128,9 +118,10 @@ Follow the [tutorial](https://www.naoj.org/Observing/Instruments/HDS/hdsql.html)
 - recommend to save by "q" several times during identification.
 - "f" after your identification, remove outliers by "d", back by "q", put "l", refit by "f".
 
-## simple Blaze function
 
-How to generate sBlazeB (simple Blaze function).
+## Blaze
+
+sBlazeBのつくりかた
 
 ```
 imarith FlatI2a2x1B / FlatI2a2x1B.nm FlatFlatI2a2x1B

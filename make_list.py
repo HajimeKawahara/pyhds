@@ -22,29 +22,29 @@ obs=[]
 obsname=[]
 
 #bias list
-bB = open(os.path.join(anadir,'b.B.list'), 'w', encoding="utf-8")
-bR = open(os.path.join(anadir,'b.R.list'), 'w', encoding="utf-8")
+bB = open(os.path.join(anadir,'b.B.list'), 'w')
+bR = open(os.path.join(anadir,'b.R.list'), 'w')
 
 #bias H list
-HB = open(os.path.join(anadir,'H.B.list'), 'w', encoding="utf-8")
-HR = open(os.path.join(anadir,'H.R.list'), 'w', encoding="utf-8")
+HB = open(os.path.join(anadir,'H.B.list'), 'w')
+HR = open(os.path.join(anadir,'H.R.list'), 'w')
 
 #comparison
-compB = open(os.path.join(anadir,'comp.B.list'), 'w', encoding="utf-8")
-compR = open(os.path.join(anadir,'comp.R.list'), 'w', encoding="utf-8")
+compB = open(os.path.join(anadir,'comp.B.list'), 'w')
+compR = open(os.path.join(anadir,'comp.R.list'), 'w')
 
 #Order trace flat
-otf = open(os.path.join(anadir,'otf.list'), 'w', encoding="utf-8")
+otf = open(os.path.join(anadir,'otf.list'), 'w')
 
 #flat
-fR = open(os.path.join(anadir,'f.R.list'), 'w', encoding="utf-8")
-fB = open(os.path.join(anadir,'f.B.list'), 'w', encoding="utf-8")
-fRoml = open(os.path.join(anadir,'f.Roml.list'), 'w', encoding="utf-8")
-fBoml = open(os.path.join(anadir,'f.Boml.list'), 'w', encoding="utf-8")
+fR = open(os.path.join(anadir,'f.R.list'), 'w')
+fB = open(os.path.join(anadir,'f.B.list'), 'w')
+fRoml = open(os.path.join(anadir,'f.Roml.list'), 'w')
+fBoml = open(os.path.join(anadir,'f.Boml.list'), 'w')
 
 #object
-objR = open(os.path.join(anadir,'obj.R.list'), 'w', encoding="utf-8")
-objB = open(os.path.join(anadir,'obj.B.list'), 'w', encoding="utf-8")
+objR = open(os.path.join(anadir,'obj.R.list'), 'w')
+objB = open(os.path.join(anadir,'obj.B.list'), 'w')
 
 otfsw2=0
 flatt=[]
