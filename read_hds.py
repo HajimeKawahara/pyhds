@@ -46,8 +46,8 @@ def read_hds2d(fitsecf,blazedf,wavlim=None):
     wav,data,header=read_hds_ecf(fitsecf_combined)#,wavlim=[5140,5200])
     bwav,bdata,header_blaze=read_hds_ecf(blazedf_combined)#,wavlim=[5140,5200])
 
-    normspec=data/bdata
-#    normspec=data ###TEST####
+#    normspec=data/bdata
+    normspec=data ###TEST####
     
     if wavlim:
         ind=np.searchsorted(wav,wavlim)
@@ -146,7 +146,7 @@ if __name__ == "__main__":
     ax=fig.add_subplot(111)
     plt.plot(wav[mask],spec[mask],color="gray")
     plt.xlabel("wavelength [$\\AA$]")
-    plt.title(object_name+" :RV = "+str(rv)+" km/s")
+    plt.title(object_name)#+" :RV = "+str(rv)+" km/s")
     maxv=np.max(spec[mask])
     minv=np.min(spec[mask])                    
     diff=(maxv-minv)
