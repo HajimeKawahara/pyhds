@@ -39,15 +39,17 @@ def read_hds2d(fitsecf,blazedf,wavlim=None):
     if not os.path.isfile(fitsecf_combined):
         from pyraf import iraf
         iraf.scombine(input=fitsecf,output=fitsecf_combined,combine="sum",group="images")
-    if not os.path.isfile(blazedf_combined):
-        from pyraf import iraf
-        iraf.scombine(input=blazedf,output=blazedf_combined,combine="sum",group="images")
 
     wav,data,header=read_hds_ecf(fitsecf_combined)#,wavlim=[5140,5200])
-    bwav,bdata,header_blaze=read_hds_ecf(blazedf_combined)#,wavlim=[5140,5200])
-
-#    normspec=data/bdata
-    normspec=data ###TEST####
+        
+    try: 
+        if not os.path.isfile(blazedf_combined):
+            from pyraf import iraf
+            iraf.scombine(input=blazedf,output=blazedf_combined,combine="sum",group="images")
+        bwav,bdata,header_blaze=read_hds_ecf(blazedf_combined)#,wavlim=[5140,5200])
+        normspec=data/bdata
+    except:
+        normspec=data ###TEST####
     
     if wavlim:
         ind=np.searchsorted(wav,wavlim)
