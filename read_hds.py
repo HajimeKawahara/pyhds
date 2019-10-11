@@ -8,6 +8,7 @@ from astroquery.atomic import AtomicLineList
 from astropy import units as u
 
 def read_hds_ecf(fitsfile,wavlim=None):
+    print(wavlim)
     ###scombine H31064omlcs_ecfwzr H31064omlcs_ecfwzr_c combine=sum group=images
     hdu = fits.open(fitsfile)
     header=hdu[0].header
@@ -25,7 +26,7 @@ def read_hds_ecf(fitsfile,wavlim=None):
     if wavlim:
         ind=np.searchsorted(wav,wavlim)
         print(ind)
-        return wav[ind[0]:ind[1]],data[ind[0]:ind[1]]
+        return wav[ind[0]:ind[1]],data[ind[0]:ind[1]],header
     else:
         return wav,data,header
 

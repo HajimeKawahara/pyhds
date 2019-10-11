@@ -34,15 +34,17 @@ def oncpaint(event):
     
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='specmatch_emp fit of HDS spectrum')
-    parser.add_argument('-d', nargs=1, default=["/home/kawahara/hds/ana/"],help='directory',type=str)
-    parser.add_argument('-i', nargs=1, required=True, help='obs id',type=str)
+    parser.add_argument('-d', nargs=1,help='directory',type=str)
+    parser.add_argument('-i', nargs=1,  help='obs id',type=str)
     parser.add_argument('-f', nargs="+", required=True, help='frame id(s)',type=str)
     parser.add_argument('-e', nargs=1, default=["omlcs_ecfwr"], help='file type',type=str)
     parser.add_argument('-b', nargs=1, default=["sBlazeB.fits"], help='blazed function',type=str)
     parser.add_argument('-w', nargs=2, default=[5140,5200], help='wavelength [AA] lower upper',type=float)
+    parser.add_argument('-c', help='for clean 1d spectrum', action='store_true')
 
     args = parser.parse_args()
-    os.chdir(args.d[0])
+    if args.d:
+        os.chdir(args.d[0])
     print("Extension=",args.e[0][-4:])
     if (args.e[0][-4:] != "ecfw" and args.e[0][-3:] != "ecw" and args.e[0][-4:] != "ecwc") and len(args.f) > 1:
         print(args.e[0][-4:])
@@ -50,8 +52,12 @@ if __name__ == "__main__":
         sys.exit("STOP")
     fitslist=[]
     for i in args.f:
-        fitslist.append(os.path.join("o"+str(args.i[0]),"H"+str(i)+str(args.e[0])+".fits"))
-    #data region
+        if args.i:
+            fitslist.append(os.path.join("o"+str(args.i[0]),"H"+str(i)+str(args.e[0])+".fits"))
+        else:
+            fitslist.append(i)
+            
+            #data region
     #5000-5800
     #wavlimd=5140
     #wavlimu=5200
@@ -61,24 +67,32 @@ if __name__ == "__main__":
     wavlim=[wavlimd,wavlimu]
     wavlimin=[wavlimd-10,wavlimu+11]#[5130,5211]
     wavtag="AA"+str(int(wavlimd))+"_"+str(int(wavlimu))
-    
-    blazedf=os.path.join("o"+str(args.i[0]),str(args.b[0]))
-    print("blaze function=",blazedf)
 
-    wav,spec,mask,specsn,header = rh.read_nhds2d(fitslist,blazedf,wavlim=wavlimin)
 
-    
+    if args.c:
+        wav,spec,header=rh.read_hds_ecf(fitslist[0],wavlim=wavlimin)
+        spec,mask=rh.medclipspec(spec)
+        specsn=np.ones(len(spec))#np.sqrt(spec)
+    else:
+        blazedf=os.path.join("o"+str(args.i[0]),str(args.b[0]))
+        print("blaze function=",blazedf)
+        wav,spec,mask,specsn,header = rh.read_nhds2d(fitslist,blazedf,wavlim=wavlimin)
+    print(np.sum(spec[mask]))
+
     #NAME CHECK
     name=None
     print(np.shape(header))
     for ih in header:
-        if name == None or name == ih["OBJECT"]:
-            print("OBJECT=",ih["OBJECT"])
-        else:
-            print("OBJECT=",ih["OBJECT"])
-            print("MISMATCH OBJECTS. OK? waiting 3 sec.")
-            sleep(10)
-        name=ih["OBJECT"]
+        try:
+            if name == None or name == ih["OBJECT"]:
+                print("OBJECT=",ih["OBJECT"])
+            else:
+                print("OBJECT=",ih["OBJECT"])
+                print("MISMATCH OBJECTS. OK? waiting 3 sec.")
+                sleep(10)
+            name=ih["OBJECT"]
+        except:
+            name="UNKNOWN"
 
         
     #MASKING
@@ -87,6 +101,7 @@ if __name__ == "__main__":
     if msk:
         print("load maskfile.")
         mask=np.load(maskfile)
+    
     fig=plt.figure()
     plt.plot(wav,spec,".",color="gray")
     plt.plot(wav[mask],spec[mask],".",color="red")
@@ -94,12 +109,14 @@ if __name__ == "__main__":
     cid = fig.canvas.mpl_connect('key_press_event', oncpaint)
     plt.show()
     np.save(fitslist[0]+".mask",mask)
-
+    
     #INITIALIZATION
     #fit region
     lib = specmatchemp.library.read_hdf(wavlim=wavlim)
     #SHIFTING
+    print(wav[mask])
     G_spectrum=rh.in_specmatch(wav[mask],spec[mask],specsn[mask])
+    
     sm_G = SpecMatch(G_spectrum, lib)
     sm_G.shift()
 
@@ -159,7 +176,7 @@ if __name__ == "__main__":
         cc.append(np.sum(f(wavuse*(1.0+vpc))*specuse))
     cc=np.array(cc)
     maxind=np.argmax(cc)
-    rv = vpcsearch[maxind]*c
+    rv = -vpcsearch[maxind]*c
     print("RV=",rv,"km/s")
 
     f = open("rv.txt", 'a')
