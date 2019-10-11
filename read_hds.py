@@ -130,6 +130,7 @@ if __name__ == "__main__":
 
     parser.add_argument('-e', nargs="+", default=["Mg I","Ca I"], help='element',type=str)
     parser.add_argument('-m', nargs=1, default=[2], help='display format',type=int)
+    parser.add_argument('-c', help='for clean 1d spectrum', action='store_true')
 
     args = parser.parse_args()    
     form=args.m[0]
@@ -140,10 +141,18 @@ if __name__ == "__main__":
     blazedf=args.b[0]
     wavlim=args.w #angstrom
     print(wavlim)
-    wav,spec,mask,specsn,header = read_nhds2d(fitslist,blazedf,wavlim=wavlim)
-    object_name=header[0]["OBJECT"]
-    
-    
+    if args.c:
+        wav,spec,header=read_hds_ecf(fitslist[0])
+        spec,mask=medclipspec(spec)
+        specsn=np.sqrt(spec)
+    else:
+        wav,spec,mask,specsn,header = read_nhds2d(fitslist,blazedf,wavlim=wavlim)
+
+    print(header[0])
+    try:
+        object_name=header[0]["OBJECT"]
+    except:
+        object_name="UNKNOWN"
     fig=plt.figure(figsize=(10,3))
     ax=fig.add_subplot(111)
     plt.plot(wav[mask],spec[mask],color="gray")
@@ -178,7 +187,7 @@ if __name__ == "__main__":
                 print("Failed for the element ",ele)        
             i=i+1
     ###########################
-    plt.ylim(minv,maxv)
+    plt.ylim(np.max([minv,0.0]),maxv)
     plt.savefig(object_name+"_spec.pdf",bbox_inches="tight", pad_inches=0.0)    
     plt.savefig(object_name+"_spec.png",bbox_inches="tight", pad_inches=0.0)    
     plt.show()
