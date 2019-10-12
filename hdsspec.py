@@ -184,7 +184,7 @@ if __name__ == "__main__":
     f.close()
 
     fig=plt.figure()
-    plt.plot(vpcsearch*c,cc)
+    plt.plot(-vpcsearch*c,cc)
     plt.plot([rv],[cc[maxind]],"o")
     plt.xlabel("RV [km/s]")
     plt.ylabel("CCF")
